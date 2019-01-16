@@ -61,7 +61,7 @@ module NLP.WordNet
     )
     where
 
-import Prelude
+import Prelude hiding (Word)
 import Data.Tree
 import qualified Data.Set as Set
 import System.IO.Unsafe
@@ -86,9 +86,9 @@ runWordNetQuiet :: WN a -> IO a
 runWordNetQuiet = runWordNetWithOptions Nothing (Just (\_ _ -> return ()))
 
 -- | Takes a FilePath to the directory holding WordNet and
--- a function to do with warnings and a WordNet command, initializes 
+-- a function to do with warnings and a WordNet command, initializes
 -- the environment and returns the results in the 'IO' monad.
-runWordNetWithOptions :: 
+runWordNetWithOptions ::
     Maybe FilePath ->                          -- word net data directory
     Maybe (String -> SomeException -> IO ()) ->    -- warning function (by default, warnings go to stderr)
     WN a ->                                    -- what to run
@@ -105,7 +105,7 @@ initializeWordNet :: IO WordNetEnv
 initializeWordNet = P.initializeWordNet
 
 -- | Takes a FilePath to the directory holding WordNet and
--- a function to do with warnings, initializes 
+-- a function to do with warnings, initializes
 -- the environment and returns a 'WordNetEnv' as in 'initializeWordNet'.
 initializeWordNetWithOptions :: Maybe FilePath -> Maybe (String -> SomeException -> IO ()) -> IO WordNetEnv
 initializeWordNetWithOptions = P.initializeWordNetWithOptions
@@ -144,13 +144,13 @@ getOverview word = unsafePerformIO $ do
 -- 'SearchResult' in the results for each valid sense.  If 'SenseType' is
 -- a single sense number, there will be at most one element in the result list.
 searchByOverview :: WN (Overview -> POS -> SenseType -> [SearchResult])
-searchByOverview overview pos sense = unsafePerformIO $ 
+searchByOverview overview pos sense = unsafePerformIO $
   case (case pos of { Noun -> T.nounIndex ; Verb -> T.verbIndex ; Adj -> T.adjIndex ; Adv -> T.advIndex })
           overview of
     Nothing  -> return []
     Just idx -> do
       let numSenses = T.indexSenseCount idx
-      skL <- mapMaybe id `liftM` 
+      skL <- mapMaybe id `liftM`
              unsafeInterleaveIO (
                mapM (\sense' -> do
                      skey <- P.indexToSenseKey ?wne idx sense'
@@ -161,11 +161,11 @@ searchByOverview overview pos sense = unsafePerformIO $
                  unsafeInterleaveIO (P.getSynsetForSense ?wne skey) >>= \v ->
                  case v of
                    Nothing -> return Nothing
-                   Just ss -> return $ Just (T.SearchResult 
-                                               (Just skey) 
-                                               (Just overview) 
+                   Just ss -> return $ Just (T.SearchResult
+                                               (Just skey)
+                                               (Just overview)
                                                (Just idx)
-                                               (Just (SenseNumber snum)) 
+                                               (Just (SenseNumber snum))
                                                ss)
                 ) skL
       return (mapMaybe id r)
@@ -211,7 +211,7 @@ closure f x = Node x (map (closure f) $ f x)
 -- >   --- <placental placental_mammal eutherian eutherian_mammal> --- <mammal>\\
 -- >   --- <vertebrate craniate> --- <chordate> --- <animal animate_being beast\\
 -- >   brute creature fauna> --- <organism being> --- <living_thing animate_thing>\\
--- >   --- <object physical_object> --- <entity> 
+-- >   --- <object physical_object> --- <entity>
 closureOn :: WN (Form -> SearchResult -> Tree SearchResult)
 closureOn form = closure (relatedBy form)
 
@@ -271,9 +271,9 @@ meet emptyBg sr1 sr2 = srch Set.empty Set.empty (addToBag emptyBg t1) (addToBag 
     srch v1 v2 bag1 bag2
         | isEmptyBag bag1 && isEmptyBag bag2 = Nothing
         | isEmptyBag bag1                    = srch v2 v1 bag2 bag1
-        | otherwise = 
+        | otherwise =
             let (Node sr chl, bag1') = splitBag bag1
-            in  if v2 `containsResult` sr 
+            in  if v2 `containsResult` sr
                   then Just sr
                   else srch v2 (addResult v1 sr) bag2 (addListToBag bag1' chl) -- flip the order :)
 
@@ -296,7 +296,7 @@ meet emptyBg sr1 sr2 = srch Set.empty Set.empty (addToBag emptyBg t1) (addToBag 
 -- This is marginally less efficient than just using 'meet', since it uses
 -- linear-time lookup for the visited sets, whereas 'meet' uses log-time
 -- lookup.
-meetPaths :: Bag b (Tree SearchResult) => 
+meetPaths :: Bag b (Tree SearchResult) =>
              WN (
                  b (Tree SearchResult) ->       -- bag implementation
                  SearchResult ->                -- word 1
@@ -318,15 +318,15 @@ meetSearchPaths emptyBg t1 t2 =
   let srch b v1 v2 bag1 bag2
         | isEmptyBag bag1 && isEmptyBag bag2 = Nothing
         | isEmptyBag bag1                    = srch (not b) v2 v1 bag2 bag1
-        | otherwise = 
+        | otherwise =
             let (Node sr chl, bag1') = splitBag bag1
                 sl = srWords sr AllSenses
             in  if v2 `containsResult` sl
-                  then Just $ if b 
-                                then (reverse v1, sr, drop 1 $ dropWhile ((/=sl) . flip srWords AllSenses) v2) 
+                  then Just $ if b
+                                then (reverse v1, sr, drop 1 $ dropWhile ((/=sl) . flip srWords AllSenses) v2)
                                 else (reverse $ drop 1 $ dropWhile ((/=sl) . flip srWords AllSenses) v2, sr, v1)
                   else srch (not b)
-                            v2 (addResult v1 sr) 
+                            v2 (addResult v1 sr)
                             bag2 (addListToBag bag1' chl) -- flip the order :)
   in  srch True [] [] (addToBag emptyBg t1) (addToBag emptyBg t2)
   where

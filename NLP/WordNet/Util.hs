@@ -31,7 +31,7 @@ thr3 :: (a, b, c) -> c
 thr3 (_,_,c) = c
 
 maybeRead :: (Read a, Monad m) => String -> m a
-maybeRead s = 
+maybeRead s =
   case reads s of
     (a,_):_ -> return a
     _       -> fail "error parsing string"
@@ -45,7 +45,7 @@ lexId x n = (\ (_,i,_) -> i) (ssWords x !! n)
 
 padTo :: Int -> String -> String
 padTo n s = reverse $ take n (reverse s ++ repeat '0')
-      
+
 sensesOf :: Int {- num senses -} -> SenseType -> [Int]
 sensesOf n AllSenses = [1..n]
 sensesOf n (SenseNumber i)
@@ -75,11 +75,11 @@ cannonWNString s'
     | notElem '_' s &&
       notElem '-' s &&
       notElem '.' s = [s]
-    | otherwise = 
-        nub [s, 
+    | otherwise =
+        nub [s,
              replaceChar '_' '-' s,
              replaceChar '-' '_' s,
-             filter (not . (`elem` "_-")) s,
+             filter (not . (`elem` ("_-" :: String))) s,
              filter (/='.') s
             ]
   where s = map toLower s'
@@ -93,7 +93,7 @@ replaceChar from to (c:cs)
 getPointerType :: (Eq a, IsString a) => a -> Form
 getPointerType s = fromMaybe Unknown $ lookup s l
   where
-    l = 
+    l =
        [("!",   Antonym),
         ("@",   Hypernym),
         ("~",   Hyponym),

@@ -33,9 +33,9 @@ module NLP.WordNet.Types
        numVerbSenses,
        numAdjSenses,
        numAdvSenses,
-       taggedCountNounSenses, 
-       taggedCountVerbSenses, 
-       taggedCountAdjSenses, 
+       taggedCountNounSenses,
+       taggedCountVerbSenses,
+       taggedCountAdjSenses,
        taggedCountAdvSenses,
 
      -- * The type, and functions dealing with the word net environment.
@@ -76,6 +76,8 @@ module NLP.WordNet.Types
     )
     where
 
+import Prelude hiding (Word)
+
 import Data.List
 import Data.Maybe
 
@@ -85,7 +87,7 @@ import NLP.WordNet.Util
 -- | In actuality this type is:
 --
 -- > type WN a = (?wne :: WordNetEnv) => a
--- 
+--
 -- but Haddock cannot parse this at this time.
 -- type WN a = a
 type WN a = (?wne :: WordNetEnv) => a
