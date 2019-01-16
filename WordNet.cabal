@@ -1,5 +1,5 @@
 Name:               WordNet
-Version:            0.1.2
+Version:            1.1.0
 Description:
     A pure-Haskell interface to the WordNet lexical database of English.
     Depends on the WordNet database, but not on the WordNet source code.
@@ -11,17 +11,11 @@ Author:             Hal Daume III
 Maintainer:         Max Rabkin <max.rabkin@gmail.com>
 Build-Depends:      base, filepath
 Build-Type:         Simple
-Cabal-Version:      >= 1.2
-
-Flag small_base
-    Description: Choose the new smaller, split-up base package.
+Cabal-Version:      >= 1.8
+Tested-With:        GHC == 7.4.2, GHC == 7.6.3, GHC == 7.7.20130824
 
 Library
-    if flag(small_base)
-        Build-Depends:  base >= 3, containers, filepath, array
-    else
-        Build-Depends:  base < 3, filepath
-        
+    Build-depends: base == 4.*, containers, filepath, array
     Exposed-Modules:
         NLP.WordNet
 
@@ -33,6 +27,4 @@ Library
         NLP.WordNet.Prims
         NLP.WordNet.Types
 
-    GHC-Options:    -fglasgow-exts
-
-    Extensions:     CPP
+    Extensions:     CPP, DeriveDataTypeable, FlexibleContexts, FlexibleInstances, ImplicitParams, MultiParamTypeClasses, OverloadedStrings, RankNTypes, ScopedTypeVariables
